@@ -48,17 +48,6 @@ export default function Home() {
     }
   }, [])
 
-  // useEffect(() => { 
-  //   const conditions = contactAndQuestion.map((item) => item.condition)
-  //   const parsedConditions = SurveyLogic.load(conditions)
-  //   const responseContext = SurveyLogic.createResponseContext({}, surveyQuestions, responseData)
-  //   console.log(parsedConditions)
-  //   console.log(responseContext)
-
-  //   console.log(SurveyLogic.evaluate(parsedConditions, responseContext))
-  //   // console.log(SurveyLogic.load(condition))
-  // }, [])
-
   const mainThreadPerformanceTest = async (event: SyntheticEvent) => {
     event.preventDefault();
 
