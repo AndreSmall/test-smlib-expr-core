@@ -2,7 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  basePath: "smlibexpr-core-test-pages"
+  basePath: "/test-smlib-expr-core"
+  // output: "export"
 };
 
 export default nextConfig;
