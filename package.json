@@ -9,7 +9,7 @@
     "lint": "next lint",
     "build:workers": "tsc -p tsconfig.worker.json",
     "watch:workers": "tsc -p tsconfig.worker.json --watch",
-    "deploy": "next build && touch out/.nojekyll && git add out/ && git commit -m \"Deploy\" && git subtree push --prefix out origin gh-pages"
+    "deploy": "next build && touch out/.nojekyll && git add out/ && git commit -m \"Deploy pages\" && git subtree push --prefix out origin gh-pages"
   },
   "dependencies": {
     "@sm/smlib.expr.core": "*",
