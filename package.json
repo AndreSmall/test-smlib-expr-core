@@ -9,10 +9,10 @@
     "lint": "next lint",
     "build:workers": "tsc -p tsconfig.worker.json",
     "watch:workers": "tsc -p tsconfig.worker.json --watch",
-    "deploy": "next build && touch out/.nojekyll && git add out/ && git commit -m \"Deploy pages\" && git subtree push --prefix out origin gh-pages"
+    "deploy": "npm run build && gh-pages -d out --nojekyll"
   },
   "dependencies": {
-    "@sm/smlib.expr.core": "*",
+    "@sm/smlib.expr.core": "^1.0.0",
     "date-fns": "^4.1.0",
     "kelonio": "^0.10.0",
     "next": "15.0.3",
@@ -29,6 +29,7 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
+    "gh-pages": "^6.2.0",
     "parcel": "^2.13.2",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",

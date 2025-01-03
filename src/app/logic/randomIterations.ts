@@ -6,17 +6,14 @@ import { ExpressionCoreQuestionType, ExpressionOperandType, LogicalExpressionTyp
 
 const conditions = contactAndQuestion.map((item) => item.condition) as (LogicalExpressionType|ExpressionOperandType)[]
 
-export default function randomIterations(numberOfIterations: number = 1) {
-    const numberOfTests = 1000
+export default function randomIterations(numberOfTests: number) {
+    const randomizedConditions = createRandomizedArray(conditions, numberOfTests);
 
-    const randomizedArr = createRandomizedArray(conditions, numberOfTests);
+    // see the length of the randomized array
+    // console.log(randomizedConditions.join('').length);
 
-    for(let i = 0; i < randomizedArr.length; i++) {
-        for(let testIterator = 0; testIterator < numberOfIterations; testIterator++) {
-            loadAndEvaluate(randomizedArr[i], surveyQuestions as ExpressionCoreQuestionType[], responseData)
-            // const result = loadAndEvaluate(randomizedArr[i], surveyQuestions, responseData)
-            // console.log(result)
-        }
+    for(const ruleCondition of randomizedConditions) {
+        loadAndEvaluate(ruleCondition, surveyQuestions as ExpressionCoreQuestionType[], responseData)
     }
 }
 

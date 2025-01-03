@@ -1,5 +1,5 @@
 "use client"
-
+import { join } from "path";
 import { SyntheticEvent, useEffect, useRef, useState } from "react";
 import { Measurement } from "kelonio";
 import 'react-data-grid/lib/styles.css';
@@ -9,10 +9,10 @@ import DataGrid from 'react-data-grid';
 import Image from "next/image";
 import styles from "./page.module.css";
 import { runPerformanceTests } from "./logic";
-//   import SurveyLogic from '@sm/survey-logic'
-// import { sample1 as surveyQuestions } from "./sample-data/questions";
-// import { sample1 as responseData } from './sample-data/responses';
-// import { contactAndQuestion } from "./contactAndQuestion";
+import nextConfig from "../../next.config";
+
+const iterations = 100
+const numberOfTests = 13000
 
 const dataGridColumns = [
   { key: 'id', name: 'ID' },
@@ -24,12 +24,17 @@ const dataGridColumns = [
   { key: 'stddev', name: 'Std. Deviation (ms)' },
 ];
 
+function assetPath(path: string): string {
+  return join(nextConfig.basePath ?? '/', path)
+}
+
 export default function Home() {
   const workerRef = useRef<Worker>()
   const [result, setResult] = useState<({ measurement: Measurement, startDateTime: Date})[]>([])
-  
+  const [ applicationState, setApplicationState] = useState<'idle' | 'running'>('idle')  
+
   useEffect(() => {
-    workerRef.current = new Worker('/workers/test.js?ts=' + new Date().getTime(), {
+    workerRef.current = new Worker(assetPath('/workers/test.js?ts=' + new Date().getTime()), {
       type: 'module',
     })
     workerRef.current.onmessage = (event) => {
@@ -51,15 +56,20 @@ export default function Home() {
   const mainThreadPerformanceTest = async (event: SyntheticEvent) => {
     event.preventDefault();
 
-    const startDateTime = new Date()
-    const runResult = await runPerformanceTests(10)
-    
-    const newResult = [...result, {
-      measurement: runResult,
-      startDateTime,
-    }];
+    setTimeout(async () => {
+      const startDateTime = new Date()
+      const runResult = await runPerformanceTests(numberOfTests, iterations)
+      
+      const newResult = [...result, {
+        measurement: runResult,
+        startDateTime,
+      }];
 
-    setResult(newResult)
+      setResult(newResult)
+      setApplicationState('idle')
+    }, 2000)
+
+    setApplicationState('running')
   }
 
   const rows = result.map((value, index) => ({
@@ -77,15 +87,16 @@ export default function Home() {
       <main className={styles.main}>
         <Image
           className={styles.logo}
-          src="/next.svg"
+          src={assetPath("/next.svg")}
           alt="Next.js logo"
           width={180}
           height={38}
           priority
         />
         <p>
-          Testing the expr library.
+          Testing the Expression Core library.
         </p>
+        <p>The buttons below will create a data structure with {numberOfTests} ABL conditions that will be run {iterations} times.</p>
 
         <div className={styles.ctas}>
           <a
@@ -96,8 +107,8 @@ export default function Home() {
           >
             <Image
               className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
+              src={assetPath("/vercel.svg")}
+              alt=""
               width={20}
               height={20}
             />
@@ -107,7 +118,7 @@ export default function Home() {
             className={styles.secondary}
             onClick={(event) => mainThreadPerformanceTest(event)}
           >
-            Run tests in main thread
+            {applicationState === 'idle' ? "▶ Run tests in main thread" : "🟢 Running tests..."}
           </button>
         </div>
         <div>
@@ -116,8 +127,8 @@ export default function Home() {
         </div>
       </main>
       <footer className={styles.footer}>
-        Build on {new Date().getFullYear()}
       </footer>
     </div>
   );
 }
+
