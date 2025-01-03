@@ -9,6 +9,7 @@
     "lint": "next lint",
     "build:workers": "tsc -p tsconfig.worker.json",
     "watch:workers": "tsc -p tsconfig.worker.json --watch",
+    "bundle_worker": "parcel build --no-cache --log-level info --target expr_core",
     "deploy": "npm run build && gh-pages -d out --nojekyll"
   },
   "dependencies": {
@@ -46,9 +47,13 @@
         "striptags",
         "modern-diacritics",
         "@sm/smlib.expr.core",
-        "date-fns"
+        "date-fns",
+        "tslib"
       ],
       "optimize": true
     }
+  },
+  "@parcel/resolver-default": {
+    "packageExports": true
   }
 }

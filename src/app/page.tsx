@@ -31,7 +31,7 @@ function assetPath(path: string): string {
 export default function Home() {
   const workerRef = useRef<Worker>()
   const [result, setResult] = useState<({ measurement: Measurement, startDateTime: Date})[]>([])
-  const [ applicationState, setApplicationState] = useState<'idle' | 'running'>('idle')  
+  const [ applicationState, setApplicationState] = useState<'idle' | 'running_main' | 'running_worker'>('idle')  
 
   useEffect(() => {
     workerRef.current = new Worker(assetPath('/workers/test.js?ts=' + new Date().getTime()), {
@@ -39,12 +39,29 @@ export default function Home() {
     })
     workerRef.current.onmessage = (event) => {
       console.log('Message received from worker:', event.data)
+
+      setResult((prevResult) => {
+        const { startTime, duration } = event.data
+        const newMeasurement = {
+          min: -1,
+          max: -1,
+          mean: -1,
+          totalDuration: duration,
+          standardDeviation: 0,
+        } as Measurement
+        
+        return [...prevResult, {
+          measurement: newMeasurement,
+          startDateTime: new Date(new Date().getTime() - startTime)
+        }];
+      });
+
+      setApplicationState('idle')
     }
+
     workerRef.current.onerror = (error) => {
       console.error('Worker error:', error.message, error)
     }
-
-    workerRef.current.postMessage('Hello from main script!')
     
     return () => {
       if (workerRef.current) {
@@ -69,7 +86,22 @@ export default function Home() {
       setApplicationState('idle')
     }, 2000)
 
-    setApplicationState('running')
+    setApplicationState('running_main')
+  }
+
+  const webWorkerPerformanceTest = (event: SyntheticEvent, workerRef?: Worker) => {
+    event.preventDefault();
+
+    if(!workerRef) {
+      return alert('Worker not ready');
+    }
+
+    setApplicationState('running_worker')
+
+    workerRef.postMessage({
+      numberOfTests,
+      iterations,
+    })
   }
 
   const rows = result.map((value, index) => ({
@@ -99,7 +131,7 @@ export default function Home() {
         <p>The buttons below will create a data structure with {numberOfTests} ABL conditions that will be run {iterations} times.</p>
 
         <div className={styles.ctas}>
-          <a
+          {/* <a
             className={styles.primary}
             href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
             target="_blank"
@@ -113,12 +145,15 @@ export default function Home() {
               height={20}
             />
             Run tests using web worker
-          </a>
+          </a> */}
+          <button className={styles.primary} onClick={(event) => webWorkerPerformanceTest(event, workerRef.current)}>
+            {applicationState === 'running_worker' ? "🟢 Running tests..." : "Run tests using web worker"}
+          </button>
           <button
             className={styles.secondary}
             onClick={(event) => mainThreadPerformanceTest(event)}
           >
-            {applicationState === 'idle' ? "▶ Run tests in main thread" : "🟢 Running tests..."}
+            {applicationState === 'running_main' ? "🟢 Running tests..." :  "▶ Run tests in main thread"}
           </button>
         </div>
         <div>

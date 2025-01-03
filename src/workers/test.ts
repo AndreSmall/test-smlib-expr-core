@@ -1,18 +1,27 @@
-// import SurveyLogic from '@sm/survey-logic'
-// import { load, createResponseContext, evaluate  } from '@sm/smlib.expr.core'
-
-import runPerformanceTests from "@/app/logic";
+import randomIterations from '../app/logic/randomIterations';
 
 self.onmessage = (e) => {
     console.log('Message received from main script', e);
-    // console.log('Expr core', ExprCore)
 
-    // const parsedConditions = ExprCore.load(conditions)
+    const { numberOfTests, iterations } = e.data;
 
-    // const responseContext = ExprCore.createResponseContext({}, surveyQuestions as never, responseData)
-    // // console.log(parsedConditions)
-    // // console.log(responseContext)
-
-    // console.log(ExprCore.evaluate(parsedConditions, responseContext))
-    runPerformanceTests(10, 10);
+    
+    quickRunner(numberOfTests, iterations);
+    
 };
+
+function quickRunner(numberOfTests: number, iterations: number) {
+    const startTime = performance.now()
+
+    for (let i = 0; i < iterations; i++) {
+        randomIterations(numberOfTests);
+    }
+
+    const duration = performance.now() - startTime;
+
+    self.postMessage({
+        complete: true,
+        startTime,
+        duration
+    });
+}
